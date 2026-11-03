@@ -41,43 +41,41 @@ exports.createStudent = async (req, res) => {
         res.status(201).json(newStudent);
 
     } catch {
-        res.status(500),json( {message : 'Fail'});
+        res.status(500).json( {message : 'Fail'});
     }
 };
-
 exports.updateStudent = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = Number(req.params.id);
         const { name, age, major } = req.body;
 
+        const student = await prisma.student.findUnique({ where: { id } });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
         const updatedStudent = await prisma.student.update({
-            where: { id: Number(id) },
+            where: { id },
             data: { name, age: Number(age), major },
         });
-
         res.json(updatedStudent);
-    } catch (error) {
-        if (error.code === 'P2025') {
-            return res.status(404).json({ message: 'ไม่พบนักศึกษา' });
-        }
-        console.error(error);
-        res.status(500).json({ message: 'Fail', error: error.message });
+    } catch {
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
 exports.deleteStudent = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = Number(req.params.id);
 
-        await prisma.student.delete({
-            where: { id: Number(id) },
-        });
-
-        res.json({ message: `ลบนักศึกษารหัส ${id} สำเร็จ` });
-    } catch (error) {
-        if (error.code === 'P2025') {
-            return res.status(404).json({ message: 'ไม่พบนักศึกษา' });
+        const student = await prisma.student.findUnique({ where: { id } });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
         }
-        console.error(error);
-        res.status(500).json({ message: 'Fail', error: error.message });
+
+        await prisma.student.delete({ where: { id } });
+        res.json({ message: `ลบนักศึกษารหัส ${id} สำเร็จ` });
+    } catch {
+        res.status(500).json({ message: 'Internal Server Error' });
     }
 };
