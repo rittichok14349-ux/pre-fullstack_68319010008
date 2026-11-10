@@ -14,3 +14,17 @@ model student {
   major     String   @db.VarChar(50)
   createdAt DateTime @default(now())
 }
+
+model course {
+  id          Int      @id @default(autoincrement())
+  code        String   @unique @db.VarChar(20)   // รหัสวิชา
+  name        String   @db.VarChar(100)          // ชื่อวิชา
+  objective   String?  @db.Text                  // วัตถุประสงค์รายวิชา
+  description String?  @db.Text                  // คำอธิบายรายวิชา
+  theory      Int      @default(0)               // ท (ทฤษฎี)
+  practice    Int      @default(0)               // ป (ปฏิบัติ)
+  selfStudy   Int      @default(0)               // น (ศึกษาด้วยตนเอง)
+  teacher     String?  @db.VarChar(100)          // ครูผู้สอน
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

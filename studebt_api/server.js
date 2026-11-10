@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
 
 
 app.use("/api/students", studentRoutes);
+app.use('/api/courses', require('./src/routes/course.routes'));
 
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server is Running on http://localhost:${PORT}`);
