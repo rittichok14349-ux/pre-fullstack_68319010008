@@ -14,8 +14,8 @@ const buildData = (body) => ({
   teacher: body.teacher,
 });
 
-// GET /api/courses?search=&page=1&limit=10
-exports.getCourses = async (req, res) => {
+// GET /api/subjects?search=&page=1&limit=10
+exports.getSubjects = async (req, res) => {
   try {
     const { search, page = 1, limit = 10 } = req.query;
     const pageNum = Math.max(parseInt(page, 10) || 1, 1);
@@ -31,19 +31,19 @@ exports.getCourses = async (req, res) => {
         }
       : {};
 
-    const [courses, total] = await Promise.all([
-      prisma.course.findMany({
+    const [subjects, total] = await Promise.all([
+      prisma.subject.findMany({
         where,
         orderBy: { code: 'asc' },
         skip: (pageNum - 1) * limitNum,
         take: limitNum,
       }),
-      prisma.course.count({ where }),
+      prisma.subject.count({ where }),
     ]);
 
     res.json({
       success: true,
-      data: courses,
+      data: subjects,
       pagination: { page: pageNum, limit: limitNum, total, totalPages: Math.ceil(total / limitNum) },
     });
   } catch (err) {
@@ -51,33 +51,33 @@ exports.getCourses = async (req, res) => {
   }
 };
 
-// GET /api/courses/:id
-exports.getCourseById = async (req, res) => {
+// GET /api/subjects/:id
+exports.getSubjectById = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
       return res.status(400).json({ success: false, message: 'ID ไม่ถูกต้อง' });
     }
 
-    const course = await prisma.course.findUnique({ where: { id } });
-    if (!course) {
+    const subject = await prisma.subject.findUnique({ where: { id } });
+    if (!subject) {
       return res.status(404).json({ success: false, message: 'ไม่พบรายวิชา' });
     }
-    res.json({ success: true, data: course });
+    res.json({ success: true, data: subject });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 };
 
-// POST /api/courses
-exports.createCourse = async (req, res) => {
+// POST /api/subjects
+exports.createSubject = async (req, res) => {
   try {
     if (!req.body.code || !req.body.name) {
       return res.status(400).json({ success: false, message: 'กรุณาระบุรหัสวิชาและชื่อวิชา' });
     }
 
-    const course = await prisma.course.create({ data: buildData(req.body) });
-    res.status(201).json({ success: true, data: course });
+    const subject = await prisma.subject.create({ data: buildData(req.body) });
+    res.status(201).json({ success: true, data: subject });
   } catch (err) {
     if (err.code === 'P2002') {
       return res.status(409).json({ success: false, message: 'รหัสวิชานี้มีอยู่แล้ว' });
@@ -86,19 +86,19 @@ exports.createCourse = async (req, res) => {
   }
 };
 
-// PUT /api/courses/:id
-exports.updateCourse = async (req, res) => {
+// PUT /api/subjects/:id
+exports.updateSubject = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
       return res.status(400).json({ success: false, message: 'ID ไม่ถูกต้อง' });
     }
 
-    const course = await prisma.course.update({
+    const subject = await prisma.subject.update({
       where: { id },
       data: buildData(req.body),
     });
-    res.json({ success: true, data: course });
+    res.json({ success: true, data: subject });
   } catch (err) {
     if (err.code === 'P2025') {
       return res.status(404).json({ success: false, message: 'ไม่พบรายวิชา' });
@@ -110,15 +110,15 @@ exports.updateCourse = async (req, res) => {
   }
 };
 
-// DELETE /api/courses/:id
-exports.deleteCourse = async (req, res) => {
+// DELETE /api/subjects/:id
+exports.deleteSubject = async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
     if (Number.isNaN(id)) {
       return res.status(400).json({ success: false, message: 'ID ไม่ถูกต้อง' });
     }
 
-    await prisma.course.delete({ where: { id } });
+    await prisma.subject.delete({ where: { id } });
     res.json({ success: true, message: 'ลบรายวิชาเรียบร้อยแล้ว' });
   } catch (err) {
     if (err.code === 'P2025') {
